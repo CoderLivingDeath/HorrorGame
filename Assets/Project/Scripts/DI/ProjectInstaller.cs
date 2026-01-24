@@ -7,11 +7,6 @@ public class ProjectInstaller : MonoBehaviour, IInstaller
     public void InstallBindings(ContainerBuilder containerBuilder)
     {
         ImmediateInstall(containerBuilder);
-
-        containerBuilder.AddTransient<PlayerService>(c => new PlayerService());
-        containerBuilder.AddTransient<MacWelcomeViewModel>(c => new MacWelcomeViewModel(c.Resolve<ComputerManager>(), new()));
-        containerBuilder.AddTransient<PrintViewModel>(c => new PrintViewModel(c.Resolve<PlayerService>()));
-        containerBuilder.AddTransient<PrintSecondViewModel>(c => new PrintSecondViewModel(c.Resolve<PlayerService>()));
     }
 
     private void ImmediateInstall(ContainerBuilder containerBuilder)
