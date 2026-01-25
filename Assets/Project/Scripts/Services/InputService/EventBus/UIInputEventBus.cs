@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class UIInputEventBus : IDisposable
 {
     public event Action<InputAction.CallbackContext> OnSubmit;
+    public event Action<InputAction.CallbackContext> OnCancel;
 
     private void Rise<T>(Action<T> @event, T value)
     {
@@ -12,6 +13,7 @@ public class UIInputEventBus : IDisposable
     }
 
     public void RiseSubmit(InputAction.CallbackContext context) => Rise(OnSubmit, context);
+    public void RiseCancel(InputAction.CallbackContext context) => Rise(OnCancel, context);
 
     private bool disposed;
     public bool Disposed => disposed;

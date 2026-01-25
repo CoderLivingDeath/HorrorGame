@@ -9,7 +9,7 @@ using static AnimationLibrary;
 
 public class DisketController : MonoBehaviour
 {
-    private Animation<MoveToTargetContext> _hoverAnimation;
+    private Animation<MoveToTargetContext> _hoverAnimation = MoveToTarget;
 
     [SerializeField]
     private MoveToTargetContext _enterHoverAnimationContext;
@@ -18,19 +18,6 @@ public class DisketController : MonoBehaviour
     private MoveToTargetContext _exitHoverAnimationContext;
 
     private CancellationTokenSource _CTS = new();
-
-    void Awake()
-    {
-        _hoverAnimation = GetHoverAnimation();
-    }
-
-    private Animation<MoveToTargetContext> GetHoverAnimation()
-    {
-        Animation<MoveToTargetContext> @delegate = MoveToTarget;
-
-        return @delegate;
-    }
-
 
     public void HoverEnter()
     {

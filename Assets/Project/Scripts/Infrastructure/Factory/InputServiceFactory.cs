@@ -58,5 +58,7 @@ public class InputServiceFactory : IFactory<InputService>
         service.Subscribe(new(GAMEPLAY_MAP, GAMEPLAY_INTERACT_ACTION), inputEventBus.Gameplay.RiseInteract, InputActionType.Performed);
 
         service.Subscribe(new(GAMEPLAY_MAP, GAMEPLAY_MOUSE_L_ACTION), inputEventBus.Gameplay.RiseMoseL, InputActionType.Performed | InputActionType.Canceled);
+
+        service.Subscribe(new("UI", "Cancel"), inputEventBus.UI.RiseCancel);
     }
 }

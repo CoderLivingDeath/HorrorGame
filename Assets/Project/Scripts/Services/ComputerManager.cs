@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class ComputerManager : MonoBehaviour
+public class  ComputerManager : MonoBehaviour
 {
     [SerializeField]
     private WindowController CoreComputer;

@@ -16,37 +16,31 @@ public class MouseEventsEmitter : MonoBehaviour
 
     public void EmittOnMouseDown()
     {
-        if (this.enabled)
-            onMouseDown?.Invoke();
+        onMouseDown?.Invoke();
     }
 
     public void EmittOnMouseUp()
     {
-        if (this.enabled)
-            onMouseUp?.Invoke();
+        onMouseUp?.Invoke();
     }
 
     public void EmittOnMouseDrag(Vector2 delta)
     {
-        if (this.enabled)
-            onMouseDrag?.Invoke(delta);
+        onMouseDrag?.Invoke(delta);
     }
 
     public void EmittOnMouseEnter()
     {
-        if (this.enabled)
-            onMouseEnter?.Invoke();
+        onMouseEnter?.Invoke();
     }
 
     public void EmittOnMouseExit()
     {
-        if (this.enabled)
-            onMouseExit?.Invoke();
+        onMouseExit?.Invoke();
     }
 
     public void EmittMousePosition(PointerContext context)
     {
-        if (!this.enabled) return;
 
         onMousePosition?.Invoke(context.ScreenPos);
         onMousePosition3D?.Invoke(context.WorldPos);
@@ -55,8 +49,7 @@ public class MouseEventsEmitter : MonoBehaviour
 
     public void EmittMousePosition3D(Vector3 position)
     {
-        if (this.enabled)
-            onMousePosition3D?.Invoke(position);
+        onMousePosition3D?.Invoke(position);
     }
 
     public readonly struct PointerContext

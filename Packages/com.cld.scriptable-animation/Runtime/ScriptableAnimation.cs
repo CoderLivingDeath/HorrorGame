@@ -8,6 +8,7 @@ using UnityEditor;
 
 namespace ScriptableAnimation
 {
+
     /// <summary>
     /// Delegate for asynchronous animation operations without context.
     /// </summary>
@@ -17,22 +18,6 @@ namespace ScriptableAnimation
     /// Delegate for asynchronous animation operations with a generic context.
     /// </summary>
     public delegate UniTask Animation<T>(T context, CancellationToken token = default);
-    public ref struct RangeEnumerator
-    {
-        private int _current, _end;
-
-        public RangeEnumerator(int start, int count)
-        {
-            _current = start;
-            _end = start + count;
-        }
-
-        public bool MoveNext() => _current < _end;
-        public int Current => _current++;
-
-        public static RangeEnumerator Create(int count) => new(0, count);
-}
-
     /// <summary>
     /// Static utility class providing methods to create animation sequences.
     /// </summary>
@@ -649,7 +634,7 @@ namespace ScriptableAnimation
 
         #endregion
 
-        #region Extentions Animation With Generic Context
+    #region Extentions Animation With Generic Context
         /// <summary>
         /// Chains this animation with others in sequence or parallel.
         /// </summary>
