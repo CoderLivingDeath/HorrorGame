@@ -246,6 +246,27 @@ public static partial class AnimationLibrary
             Start = start;
             End = end;
         }
+
+        public static ScriptableAnimation.Animation<RotateContext> GetAnimationWithContext()
+        {
+            return Rotate;
+        }
+
+        public static RotateContext Create(Transform target, Quaternion targetRot, float duration = 1f, float delay = 0f, Ease ease = Ease.InOutQuad)
+        {
+            return new RotateContext(target, target.rotation, targetRot, duration, delay, ease);
+        }
+
+        public ScriptableAnimation.Animation GetAnimation()
+        {
+            var animation = GetAnimationWithContext();
+            return async (token) => await animation.Invoke(this, token);
+        }
+
+        public async UniTask Animate(CancellationToken token = default)
+        {
+            await GetAnimation().Invoke(token);
+        }
     }
 
     [Serializable]
@@ -254,16 +275,37 @@ public static partial class AnimationLibrary
         public Vector3 Start;
         public Vector3 End;
 
-
         public ScaleContext()
         {
 
         }
+
         public ScaleContext(Transform obj, Vector3 start = default, Vector3 end = default, float duration = 1, float delay = 0f, Ease ease = Ease.Linear)
             : base(obj, duration, delay, ease, AnimationSpace.Local)
         {
             Start = start;
             End = end;
+        }
+
+        public static ScriptableAnimation.Animation<ScaleContext> GetAnimationWithContext()
+        {
+            return Scale;
+        }
+
+        public static ScaleContext Create(Transform target, Vector3 targetScale, float duration = 1f, float delay = 0f, Ease ease = Ease.InOutQuad)
+        {
+            return new ScaleContext(target, target.localScale, targetScale, duration, delay, ease);
+        }
+
+        public ScriptableAnimation.Animation GetAnimation()
+        {
+            var animation = GetAnimationWithContext();
+            return async (token) => await animation.Invoke(this, token);
+        }
+
+        public async UniTask Animate(CancellationToken token = default)
+        {
+            await GetAnimation().Invoke(token);
         }
     }
 
@@ -278,12 +320,35 @@ public static partial class AnimationLibrary
         {
 
         }
+
         public RotateEulerContext(Transform obj, Vector3 startEuler = default, Vector3 endEuler = default,
             float duration = 1f, float delay = 0f, Ease ease = Ease.Linear, AnimationSpace space = AnimationSpace.World)
             : base(obj, Mathf.Max(duration, 0.016f), delay, ease, space)
         {
             StartEuler = startEuler;
             End = endEuler;
+        }
+
+        public static ScriptableAnimation.Animation<RotateEulerContext> GetAnimationWithContext()
+        {
+            return RotateEuler;
+        }
+
+        public static RotateEulerContext Create(Transform target, Vector3 targetEuler, float duration = 1f, float delay = 0f, Ease ease = Ease.InOutQuad)
+        {
+            Vector3 currentEuler = target.eulerAngles;
+            return new RotateEulerContext(target, currentEuler, targetEuler, duration, delay, ease);
+        }
+
+        public ScriptableAnimation.Animation GetAnimation()
+        {
+            var animation = GetAnimationWithContext();
+            return async (token) => await animation.Invoke(this, token);
+        }
+
+        public async UniTask Animate(CancellationToken token = default)
+        {
+            await GetAnimation().Invoke(token);
         }
     }
 
@@ -308,7 +373,28 @@ public static partial class AnimationLibrary
             End = relativeEnd;
         }
 
-        public static Animation<MoveToTargetContext> GetAnimation() => MoveToTarget;
+        public static ScriptableAnimation.Animation<MoveToTargetContext> GetAnimationWithContext()
+        {
+            return MoveToTarget;
+        }
+
+        public static MoveToTargetContext Create(Transform target, Vector3 targetPos, float duration = 1f, float delay = 0f, Ease ease = Ease.InOutQuad)
+        {
+            return new MoveToTargetContext(target, targetPos, duration, delay, ease);
+        }
+
+        public new ScriptableAnimation.Animation GetAnimation()
+        {
+            var animation = GetAnimationWithContext();
+            return async (token) => await animation.Invoke(this, token);
+        }
+
+        public async UniTask Animate(CancellationToken token = default)
+        {
+            await GetAnimation().Invoke(token);
+        }
+
+
     }
 
     [Serializable]
@@ -327,7 +413,28 @@ public static partial class AnimationLibrary
             EndEuler = endEuler;
         }
 
-        public static Animation<RotateEulerToTargetContext> GetAnimation() => RotateEulerToTarget;
+        public static ScriptableAnimation.Animation<RotateEulerToTargetContext> GetAnimationWithContext()
+        {
+            return RotateEulerToTarget;
+        }
+
+        public static RotateEulerToTargetContext Create(Transform target, Vector3 targetEuler, float duration = 1f, float delay = 0f, Ease ease = Ease.InOutQuad)
+        {
+            return new RotateEulerToTargetContext(target, targetEuler, duration, delay, ease);
+        }
+
+        public new ScriptableAnimation.Animation GetAnimation()
+        {
+            var animation = GetAnimationWithContext();
+            return async (token) => await animation.Invoke(this, token);
+        }
+
+        public async UniTask Animate(CancellationToken token = default)
+        {
+            await GetAnimation().Invoke(token);
+        }
+
+
     }
 
     [Serializable]
@@ -350,6 +457,27 @@ public static partial class AnimationLibrary
             : base(obj, duration, delay, ease, space)
         {
             EndSelector = endSelector ?? throw new ArgumentNullException(nameof(endSelector));
+        }
+
+        public static ScriptableAnimation.Animation<MoveToTargetDynamicContext> GetAnimationWithContext()
+        {
+            return MoveToTargetDynamic;
+        }
+
+        public static MoveToTargetDynamicContext Create(Transform target, Func<Vector3> endSelector, float duration = 1f, float delay = 0f, Ease ease = Ease.InOutQuad)
+        {
+            return new MoveToTargetDynamicContext(target, endSelector, duration, delay, ease);
+        }
+
+        public new ScriptableAnimation.Animation GetAnimation()
+        {
+            var animation = GetAnimationWithContext();
+            return async (token) => await animation.Invoke(this, token);
+        }
+
+        public async UniTask Animate(CancellationToken token = default)
+        {
+            await GetAnimation().Invoke(token);
         }
     }
 
@@ -397,6 +525,27 @@ public static partial class AnimationLibrary
         {
             StartSelector = startSelector ?? throw new ArgumentNullException(nameof(startSelector));
             EndSelector = endSelector ?? throw new ArgumentNullException(nameof(endSelector));
+        }
+
+        public static ScriptableAnimation.Animation<MoveDynamicContext> GetAnimationWithContext()
+        {
+            return MoveDynamic;
+        }
+
+        public static MoveDynamicContext Create(Transform target, Func<Vector3> startSelector, Func<Vector3> endSelector, float duration = 1f, float delay = 0f, Ease ease = Ease.InOutQuad)
+        {
+            return new MoveDynamicContext(target, startSelector, endSelector, duration, delay, ease);
+        }
+
+        public new ScriptableAnimation.Animation GetAnimation()
+        {
+            var animation = GetAnimationWithContext();
+            return async (token) => await animation.Invoke(this, token);
+        }
+
+        public async UniTask Animate(CancellationToken token = default)
+        {
+            await GetAnimation().Invoke(token);
         }
     }
 
