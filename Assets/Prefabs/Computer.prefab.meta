@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Prefabs/Computer.prefab.meta
 guid: c426203dbeceb6742aad29a2265cea1f
+========
+guid: d903c0e1b3ff3014599a3820ca3e619c
+>>>>>>>> Refactor floppy disk prefabs and animation system:Assets/Prefabs/DiskRed.prefab.meta
 PrefabImporter:
   externalObjects: {}
   userData: 

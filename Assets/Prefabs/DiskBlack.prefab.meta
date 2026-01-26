@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Prefabs/DiskBlack.prefab.meta
 guid: fa71b1e44dee5a449a120dbc53013383
+========
+guid: 5ff981c3e6826114fa4f33b091140642
+>>>>>>>> Refactor floppy disk prefabs and animation system:Assets/Prefabs/DiskYellow.prefab.meta
 PrefabImporter:
   externalObjects: {}
   userData: 

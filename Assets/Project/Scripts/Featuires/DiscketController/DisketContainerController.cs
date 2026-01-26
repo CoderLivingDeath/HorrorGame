@@ -1,11 +1,8 @@
 using Cysharp.Threading.Tasks;
 using LitMotion;
 using Reflex.Attributes;
-using ScriptableAnimation;
-using System;
 using System.Threading;
 using UnityEngine;
-using static AnimationLibrary;
 
 public class DisketContainerController : MonoBehaviour
 {
