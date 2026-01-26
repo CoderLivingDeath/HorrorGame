@@ -9,25 +9,17 @@ using static AnimationLibrary;
 
 public class DisketContainerController : MonoBehaviour
 {
-    private Animation<MoveAndRotateParallelContext> _discketContainerAnimation;
-
-    private Animation<MoveToTargetContext> _hover = MoveToTarget;
 
     #region CTS
 
-    private CancellationTokenSource _globalCTS = new();
+    private CancellationTokenSource InteractionCTS;
 
-    private CancellationTokenSource _interactionCTS = new();
-
-    private CancellationTokenSource _hover_CTS = new();
-
+    private CancellationTokenSource CreateInteractionCTS() => CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken); 
     #endregion
 
     #region Flags
 
     private bool _isAnimationg = false;
-
-    private bool _canHover = true;
 
     #endregion
 
@@ -35,39 +27,15 @@ public class DisketContainerController : MonoBehaviour
     private InputEventBus _InputEventBus;
 
     [SerializeField]
-    private MoveAndRotateParallelContext EnterAnimationContext;
+    private DisketContainerAnimations _disketContainerAnimations;
 
     [SerializeField]
-    private MoveAndRotateParallelContext ExitAnimationContext;
+    private Collider _collider;
 
-    [SerializeField]
-    private MoveToTargetContext HoverEnter;
 
-    [SerializeField]
-    private MoveToTargetContext HoverExit;
-
-    [SerializeField]
-    private RotateEulerToTargetContext LidOpenAnimation;
-
-    [SerializeField]
-    private RotateEulerToTargetContext LidCloseAnimation;
-
-    [SerializeField]
-    private Collider Collider;
-
-    void Awake()
+    private void Start()
     {
-        _discketContainerAnimation = GetAnim();
-    }
-
-    private Animation<MoveAndRotateParallelContext> GetAnim()
-    {
-        var anim = AnimationTools.Sequence<MoveAndRotateParallelContext>(
-        parallel: true,
-        (ctx, t) => MoveToTarget(ctx.Move, t),
-        (ctx, t) => RotateEulerToTarget(ctx.Rotate, t));
-
-        return anim;
+        InteractionCTS = CreateInteractionCTS();
     }
 
     private bool CanInteract()
@@ -79,105 +47,75 @@ public class DisketContainerController : MonoBehaviour
     {
         if (!CanInteract()) return;
 
-        ResetHoverCTS();
-
-        ResetCTS();
-        EnterInteraction(_interactionCTS.Token).Forget();
-    }
-
-    public void OnHoverEnter()
-    {
-        if (!_canHover) return;
-
-        ResetHoverCTS();
-        _hover.Invoke(HoverEnter, _hover_CTS.Token);
-    }
-
-    public void OnHoverExit()
-    {
-        if (!_canHover) return;
-
-        ResetHoverCTS();
-        _hover.Invoke(HoverExit, _hover_CTS.Token);
+        EnterInteraction(destroyCancellationToken).Forget();
     }
 
     public async UniTask EnterInteraction(CancellationToken token = default)
     {
-        _isAnimationg = true;
-        _canHover = false;
 
-        await _discketContainerAnimation.Invoke(EnterAnimationContext, token);
-        Collider.enabled = false;
         _InputEventBus.UI.OnCancel += _gameplayInputEventBus_OnCancel;
 
+        if (!_disketContainerAnimations.IsHoverEnter)
+        {
+            var hoverEnterTask = _disketContainerAnimations.AnimateHoverEnter(token);
+
+            _disketContainerAnimations.CanHover = false;
+
+            await hoverEnterTask;
+        }
+        else
+        {
+            _disketContainerAnimations.CanHover = false;
+        }
+
+
+        _isAnimationg = true;
+
+        var openlidTask = _disketContainerAnimations.AnimateOpenLid(token);
+        var moveToPlayerTask = _disketContainerAnimations.AnimateMoveToPlayer(token).ContinueWith(() => _collider.enabled = false);
+
+        var animations = UniTask.WhenAll(openlidTask, moveToPlayerTask);
+
+        await UniTask.WhenAny(animations, InteractionCTS.Token.ToUniTask().Item1);
+
         _isAnimationg = false;
+
+        _collider.enabled = false;
+
     }
 
     private void _gameplayInputEventBus_OnCancel(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
-        ResetHoverCTS();
-
-        ResetCTS();
-        ExitInteraction(_interactionCTS.Token).Forget();
+        ResetInteractionCTS();
+        ExitInteraction().Forget();
+        _InputEventBus.UI.OnCancel -= _gameplayInputEventBus_OnCancel;
     }
 
     public async UniTask ExitInteraction(CancellationToken token = default)
     {
-
+        _collider.enabled = true;
         _isAnimationg = true;
 
-        await _discketContainerAnimation.Invoke(ExitAnimationContext, token);
+        var closelidTask = _disketContainerAnimations.AnimateCloseLid(token);
+        var moveToTableTask = _disketContainerAnimations.AnimateMoveToTable(token);
 
-        Collider.enabled = true;
+
+        await UniTask.WhenAll(closelidTask, moveToTableTask);
 
         _isAnimationg = false;
-        _canHover = true;
+
+        _disketContainerAnimations.CanHover = true;
+
+        _disketContainerAnimations.AnimateHoverExit().Forget();
     }
 
-    [ContextMenu("Reset Global CTS")]
-    private void ResetGlobalCTS()
+    public void ResetInteractionCTS()
     {
-        _globalCTS?.Cancel();
-        _globalCTS?.Dispose();
-        _globalCTS = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-    }
+        InteractionCTS?.Cancel();
+        InteractionCTS?.Dispose();
 
-    private void ResetHoverCTS()
-    {
-        _hover_CTS?.Cancel();
-        _hover_CTS?.Dispose();
-        _hover_CTS = CancellationTokenSource.CreateLinkedTokenSource(_globalCTS.Token);
-    }
-
-    private void ResetCTS()
-    {
-        _interactionCTS?.Cancel();
-        _interactionCTS?.Dispose();
-        _interactionCTS = CancellationTokenSource.CreateLinkedTokenSource(_globalCTS.Token);
-    }
-
-    void OnDestroy()
-    {
-        _interactionCTS?.Cancel();
-        _interactionCTS?.Dispose();
-        _interactionCTS = null;
-
-        _hover_CTS?.Cancel();
-        _hover_CTS?.Dispose();
-        _hover_CTS = null;
+        InteractionCTS = CreateInteractionCTS();
     }
 }
 
-[Serializable]
-public struct MoveAndRotateParallelContext : IAnimationContext
-{
-    public AnimationLibrary.MoveToTargetContext Move; // struct MoveContext : IAnimationContext
-    public AnimationLibrary.RotateEulerToTargetContext Rotate; // struct RotateEulerContext : IAnimationContext
-
-    public MoveAndRotateParallelContext(AnimationLibrary.MoveToTargetContext move, AnimationLibrary.RotateEulerToTargetContext rotate)
-    {
-        Move = move;
-        Rotate = rotate;
-    }
-}
 

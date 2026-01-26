@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &5873028189485985200
+--- !u!1001 &4704483278221795830
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -10,12 +10,12 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 920716947904087087, guid: fa71b1e44dee5a449a120dbc53013383, type: 3}
       propertyPath: m_Name
-      value: DiskGreen
+      value: DiskRed
       objectReference: {fileID: 0}
     - target: {fileID: 4530548686677291604, guid: fa71b1e44dee5a449a120dbc53013383, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 0e02479a4531f354aba5fdfac061b0c9, type: 2}
+      objectReference: {fileID: 2100000, guid: 4c83c93e1d655144e99aa146070612c0, type: 2}
     - target: {fileID: 8253786581842782149, guid: fa71b1e44dee5a449a120dbc53013383, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

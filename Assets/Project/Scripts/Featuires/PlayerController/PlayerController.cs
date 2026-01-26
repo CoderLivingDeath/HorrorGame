@@ -24,7 +24,6 @@ public class PlayerController : MonoBehaviour
 
     [Inject] private InputEventBus _inputEventBus;
     private CancellationTokenSource _rotationCts = new();
-    private Animation<AnimationLibrary.MoveContext> _rotateAnimation = AnimationLibrary.Move;
 
     public bool IsAnimating = false;
 
@@ -203,26 +202,5 @@ public class PlayerController : MonoBehaviour
 
     public async UniTaskVoid RotateAsync(float targetAngleDegrees)
     {
-        _rotationCts?.Cancel();
-        _rotationCts?.Dispose();
-        _rotationCts = new CancellationTokenSource();
-
-        // Целевая ротация из массива углов
-        float normalizedTargetAngle = targetAngleDegrees % 360f;
-
-        var startRotation = CameraTarget.TrackingTarget.rotation;
-        var targetRotation = Quaternion.Euler(CameraTarget.TrackingTarget.eulerAngles.x, normalizedTargetAngle, CameraTarget.TrackingTarget.eulerAngles.z);
-
-        // Создаем контекст для вращения
-        var context = new AnimationLibrary.RotateContext(
-            obj: CameraTarget.TrackingTarget,
-            start: startRotation,
-            end: targetRotation,
-            duration: RotationDuration,
-            delay: 0f,
-            ease: RotationEase
-        );
-
-        await AnimationLibrary.Rotate(context, _rotationCts.Token);
     }
 }

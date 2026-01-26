@@ -4,7 +4,6 @@
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="UniTask.Addressables.csproj" />
   <Project Path="UniTask.TextMeshPro.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="ScriptableAnimation.csproj" />
   <Project Path="UniTask.Editor.csproj" />
   <Project Path="UniTask.DOTween.csproj" />
