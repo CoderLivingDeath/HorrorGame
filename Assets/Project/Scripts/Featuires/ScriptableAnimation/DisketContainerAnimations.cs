@@ -1,13 +1,9 @@
 ﻿using Cysharp.Threading.Tasks;
 using LitMotion;
 using LitMotion.Extensions;
-using ScriptableAnimation;
 using System;
 using System.Threading;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
-using static AnimationLibrary;
 
 public class DisketContainerAnimations : MonoBehaviour
 {
