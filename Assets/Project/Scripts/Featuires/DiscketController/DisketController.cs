@@ -12,10 +12,15 @@ public class DisketController : MonoBehaviour
     private Transform RootTransform;
 
     [SerializeField]
-    private DisketAnimations disketAnimations;
+    private DisketAnimations _disketAnimations;
 
     [SerializeField]
     private DisketContainerController disketContainerController;
+
+    [SerializeField]
+    private ComputerController _computerController;
+
+    public DisketAnimations DisketAnimations => _disketAnimations;
 
     public void OnInteract()
     {
@@ -24,16 +29,18 @@ public class DisketController : MonoBehaviour
 
     public async UniTask StartInject()
     {
-        var hoverExitTask = disketAnimations.AnimateHoverExit();
-        disketAnimations.CanHover = false;
+        var hoverExitTask = _disketAnimations.AnimateHoverExit();
+        _disketAnimations.CanHover = false;
         await hoverExitTask;
 
         this.transform.SetParent(RootTransform);
         await disketContainerController.ExitInteraction();
 
-        await disketAnimations.AnimateMoveToComputer();
-        await disketAnimations.AnimateMoveToInjector();
+        await _disketAnimations.AnimateMoveToComputer();
+        await _disketAnimations.AnimateMoveToInjector();
 
         this.gameObject.SetActive(false);
+
+        _computerController.SetInjectedDisket(this);
     }
 }

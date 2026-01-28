@@ -62,7 +62,64 @@ public class DisketAnimations : MonoBehaviour
         public MoveToInjectorContext MoveToInjector;
     }
 
-    public UniTask AnimateMoveToComputer(in InjectDisketContext.MoveToComputerContext context, CancellationToken token = default)
+    [Serializable]
+    public struct EjectDisketContext
+    {
+
+        [Serializable]
+        public struct MoveFromInjectorContext
+        {
+            public Transform Object;
+            public float Duration;
+            public float Delay;
+            public Ease Ease;
+            public Space Space;
+            public Transform TargetPosition;
+        }
+
+
+        [Serializable]
+        public struct MoveToContainerContext
+        {
+            public Transform Object;
+            public float Duration;
+            public float Delay;
+            public Ease Ease;
+            public Space Space;
+            public Transform TargetPosition;
+            public Vector3 TargetRotation;
+        }
+
+        public MoveFromInjectorContext MoveFromInjector;
+        public MoveToContainerContext MoveToContainer;
+    }
+
+    public UniTask AnimateMoveFromInjector(in EjectDisketContext.MoveFromInjectorContext context, CancellationToken token = default)
+    {
+        if (context.Object == null || context.TargetPosition == null)
+            return UniTask.CompletedTask;
+
+        Vector3 basePosition = context.Space == Space.Self ? context.Object.localPosition : context.Object.position;
+
+        var moveMotionBuilder = LMotion.Create(basePosition, context.TargetPosition.position, context.Duration)
+            .WithEase(context.Ease)
+            .WithDelay(context.Delay);
+
+        MotionHandle moveHandle;
+
+        if (context.Space == Space.Self)
+        {
+            moveHandle = moveMotionBuilder.BindToLocalPosition(context.Object);
+        }
+        else
+        {
+            moveHandle = moveMotionBuilder.BindToPosition(context.Object);
+        }
+
+        return moveHandle.ToUniTask(token);
+    }
+
+    private UniTask AnimateMoveToContainer(in EjectDisketContext.MoveToContainerContext context, CancellationToken token = default)
     {
         if (context.Object == null || context.TargetPosition == null)
             return UniTask.CompletedTask;
@@ -99,7 +156,44 @@ public class DisketAnimations : MonoBehaviour
         return UniTask.WhenAll(moveHandle.ToUniTask(token), rotationHandle.ToUniTask(token));
     }
 
-    public UniTask AnimateMoveToInjector(in InjectDisketContext.MoveToInjectorContext context, CancellationToken token = default)
+    private UniTask AnimateMoveToComputer(in InjectDisketContext.MoveToComputerContext context, CancellationToken token = default)
+    {
+        if (context.Object == null || context.TargetPosition == null)
+            return UniTask.CompletedTask;
+
+        Vector3 basePosition = context.Space == Space.Self ? context.Object.localPosition : context.Object.position;
+
+        var moveMotionBuilder = LMotion.Create(basePosition, context.TargetPosition.position, context.Duration)
+            .WithEase(context.Ease)
+            .WithDelay(context.Delay);
+
+        Quaternion baseRotation = context.Space == Space.Self
+            ? context.Object.localRotation : context.Object.rotation;
+
+        Quaternion targetRotation = Quaternion.Euler(context.TargetRotation);
+
+        var rotationBuilder = LMotion.Create(baseRotation, targetRotation, context.Duration)
+            .WithEase(context.Ease)
+            .WithDelay(context.Delay);
+
+        MotionHandle moveHandle;
+        MotionHandle rotationHandle;
+
+        if (context.Space == Space.Self)
+        {
+            moveHandle = moveMotionBuilder.BindToLocalPosition(context.Object);
+            rotationHandle = rotationBuilder.BindToLocalRotation(context.Object);
+        }
+        else
+        {
+            moveHandle = moveMotionBuilder.BindToPosition(context.Object);
+            rotationHandle = rotationBuilder.BindToRotation(context.Object);
+        }
+
+        return UniTask.WhenAll(moveHandle.ToUniTask(token), rotationHandle.ToUniTask(token));
+    }
+
+    private UniTask AnimateMoveToInjector(in InjectDisketContext.MoveToInjectorContext context, CancellationToken token = default)
     {
         if (context.Object == null || context.TargetPosition == null)
             return UniTask.CompletedTask;
@@ -205,12 +299,17 @@ public class DisketAnimations : MonoBehaviour
     [SerializeField] private HoverEnterContext _hoverEnter;
     [SerializeField] private HoverExitContext _hoverExit;
 
-    [Header("Inject Animations")]
+    [Header("Inject/Eject Animations")]
     [SerializeField] private InjectDisketContext _injectDisket;
+    [SerializeField] private EjectDisketContext _ejectDisket;
 
     private CancellationTokenSource _globalCTS;
     private CancellationTokenSource _hoverCTS;
-    private CancellationTokenSource _InjectCTS;
+    private CancellationTokenSource _InjectAndEjectCTS;
+
+    private CancellationTokenSource CreateGlobalCTS() => CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+    private CancellationTokenSource CreateHoverCTS() => CancellationTokenSource.CreateLinkedTokenSource(_globalCTS.Token);
+    private CancellationTokenSource CreateInjectAndEjectCTS() => CancellationTokenSource.CreateLinkedTokenSource(_globalCTS.Token);
 
     private void Awake()
     {
@@ -221,15 +320,18 @@ public class DisketAnimations : MonoBehaviour
     {
         DisposeAllTokens();
 
-        _globalCTS = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-        _hoverCTS = CancellationTokenSource.CreateLinkedTokenSource(_globalCTS.Token);
+        _globalCTS = CreateGlobalCTS();
+        _hoverCTS = CreateHoverCTS();
+        _InjectAndEjectCTS = CreateInjectAndEjectCTS();
     }
 
     private void DisposeAllTokens()
     {
         _globalCTS?.Cancel();
-        _hoverCTS?.Cancel();
-        _InjectCTS?.Cancel();
+
+        _globalCTS?.Dispose();
+        _hoverCTS?.Dispose();
+        _InjectAndEjectCTS?.Dispose();
     }
 
     public void ResetTokens()
@@ -260,18 +362,33 @@ public class DisketAnimations : MonoBehaviour
 
     public async UniTask AnimateMoveToComputer(CancellationToken token = default)
     {
-        CancelInject();
+        CancelInjectAndEject();
 
-        using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(token, _InjectCTS.Token);
+        using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(token, _InjectAndEjectCTS.Token);
         await AnimateMoveToComputer(_injectDisket.MoveToComputer, linkedCTS.Token);
     }
 
     public async UniTask AnimateMoveToInjector(CancellationToken token = default)
     {
-        CancelInject();
+        CancelInjectAndEject();
 
-        using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(token, _InjectCTS.Token);
+        using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(token, _InjectAndEjectCTS.Token);
         await AnimateMoveToInjector(_injectDisket.MoveToInjector, linkedCTS.Token);
+    }
+
+    public async UniTask AnimateMoveFromInjector(CancellationToken token = default)
+    {
+        CancelInjectAndEject();
+        using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(token, _InjectAndEjectCTS.Token);
+        await AnimateMoveFromInjector(_ejectDisket.MoveFromInjector, linkedCTS.Token);
+    }
+
+    public async UniTask AnimateMoveToContainer(CancellationToken token = default)
+    {
+        CancelInjectAndEject();
+
+        using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(token, _InjectAndEjectCTS.Token);
+        await AnimateMoveToContainer(_ejectDisket.MoveToContainer, linkedCTS.Token);
     }
 
     [ContextMenu("Play: Animation Hover Enter")]
@@ -286,6 +403,12 @@ public class DisketAnimations : MonoBehaviour
     [ContextMenu("Play: Animation Move To Injectr")]
     public void PlayAnimationMoveToInjector() => AnimateMoveToInjector().Forget();
 
+    [ContextMenu("Play: Animation Move From Injectr")]
+    public void PlayAnimationMoveFromInjector() => AnimateMoveFromInjector().Forget();
+
+    [ContextMenu("Play: Animation Move To Container")]
+    public void PlayAnimationMoveToContainer() => AnimateMoveToContainer().Forget();
+
     [ContextMenu("Cancel: Hover")]
     public void CancelHover()
     {
@@ -294,11 +417,11 @@ public class DisketAnimations : MonoBehaviour
         _hoverCTS = CancellationTokenSource.CreateLinkedTokenSource(_globalCTS?.Token ?? destroyCancellationToken);
     }
 
-    [ContextMenu("Cancel: Inject")]
-    public void CancelInject()
+    [ContextMenu("Cancel: Inject/Eject")]
+    public void CancelInjectAndEject()
     {
-        _InjectCTS?.Cancel();
-        _InjectCTS?.Dispose();
-        _InjectCTS = CancellationTokenSource.CreateLinkedTokenSource(_globalCTS?.Token ?? destroyCancellationToken);
+        _InjectAndEjectCTS?.Cancel();
+        _InjectAndEjectCTS?.Dispose();
+        _InjectAndEjectCTS = CancellationTokenSource.CreateLinkedTokenSource(_globalCTS?.Token ?? destroyCancellationToken);
     }
 }

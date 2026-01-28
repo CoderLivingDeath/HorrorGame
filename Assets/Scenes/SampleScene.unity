@@ -1586,6 +1586,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DisketController
   RootTransform: {fileID: 751992125}
   disketAnimations: {fileID: 795603735}
+  disketContainerController: {fileID: 1825510525}
 --- !u!1 &810053658
 GameObject:
   m_ObjectHideFlags: 0
@@ -2608,6 +2609,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 630964a5b6f0d284f92b454f8f52ea46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DisketAnimations
+--- !u!114 &1825510525 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7959851400289369974, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
+  m_PrefabInstance: {fileID: 4914359551883490132}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f1b6cdb7b4c37045ac2358d924b5b51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DisketContainerController
 --- !u!95 &1853768681
 Animator:
   serializedVersion: 7
@@ -3909,12 +3921,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5448385802816142354, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
+      propertyPath: _injectDisket.MoveToComputer.Ease
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 5448385802816142354, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
+      propertyPath: _injectDisket.MoveToInjector.Ease
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5448385802816142354, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
       propertyPath: _injectDisket.MoveToComputer.Delay
-      value: 0
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 5448385802816142354, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
       propertyPath: _injectDisket.MoveToInjector.Delay
-      value: 0
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 5448385802816142354, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
       propertyPath: _injectDisket.MoveToComputer.Object
@@ -3926,11 +3946,11 @@ PrefabInstance:
       objectReference: {fileID: 795603733}
     - target: {fileID: 5448385802816142354, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
       propertyPath: _injectDisket.MoveToComputer.Duration
-      value: 1
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 5448385802816142354, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
       propertyPath: _injectDisket.MoveToInjector.Duration
-      value: 1
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 5448385802816142354, guid: ef85d7e60319c04408fe9f13d0f82848, type: 3}
       propertyPath: _injectDisket.MoveToComputer.TargetPosition
