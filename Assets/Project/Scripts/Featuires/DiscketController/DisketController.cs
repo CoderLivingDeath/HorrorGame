@@ -5,27 +5,35 @@ using LitMotion;
 using LitMotion.Extensions;
 using ScriptableAnimation;
 using UnityEngine;
-using static AnimationLibrary;
 
 public class DisketController : MonoBehaviour
 {
+    [SerializeField]
+    private Transform RootTransform;
 
-    private CancellationTokenSource _CTS = new();
+    [SerializeField]
+    private DisketAnimations disketAnimations;
 
-    public void HoverEnter()
+    [SerializeField]
+    private DisketContainerController disketContainerController;
+
+    public void OnInteract()
     {
-        ResetCTS();
+        StartInject().Forget();
     }
 
-    public void HoverExit()
+    public async UniTask StartInject()
     {
-        ResetCTS();
-    }
+        var hoverExitTask = disketAnimations.AnimateHoverExit();
+        disketAnimations.CanHover = false;
+        await hoverExitTask;
 
-    private void ResetCTS()
-    {
-        _CTS?.Cancel();
-        _CTS?.Dispose();
-        _CTS = new();
+        this.transform.SetParent(RootTransform);
+        await disketContainerController.ExitInteraction();
+
+        await disketAnimations.AnimateMoveToComputer();
+        await disketAnimations.AnimateMoveToInjector();
+
+        this.gameObject.SetActive(false);
     }
 }

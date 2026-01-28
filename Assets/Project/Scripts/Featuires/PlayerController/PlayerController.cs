@@ -14,49 +14,17 @@ public class PlayerController : MonoBehaviour
         Rotatation, ComputerInteraction
     }
 
-    private int _currentAngle = 0;
-
     [SerializeField]
-    private float[] _rotationAngles =
-    {
-        0f, 90f, 180f, 270f
-    };
+    private PlayerAnimations PlayerAnimations;
 
     [Inject] private InputEventBus _inputEventBus;
-    private CancellationTokenSource _rotationCts = new();
-
-    public bool IsAnimating = false;
 
     public CinemachineCamera cinemachineCamera;
 
     public CameraTarget CameraTarget;
 
-    public Ease RotationEase = Ease.Linear;
-    public float RotationDuration = 1f;
-
     public State CurrentState = State.Rotatation;
 
-    void OnEnable()
-    {
-        _inputEventBus.Gameplay.OnLeft += OnLeft;
-        _inputEventBus.Gameplay.OnRight += OnRight;
-        //_inputEventBus.Gameplay.OnInteract += OnInteract;
-        _inputEventBus.Gameplay.MousePosition += OnMousePositionChanged;
-        _inputEventBus.Gameplay.MouseL += OnMouseL;
-
-        _rotationCts = new();
-    }
-
-    void OnDisable()
-    {
-        _inputEventBus.Gameplay.OnLeft -= OnLeft;
-        _inputEventBus.Gameplay.OnRight -= OnRight;
-        //_inputEventBus.Gameplay.OnInteract -= OnInteract;
-        _inputEventBus.Gameplay.MousePosition -= OnMousePositionChanged;
-
-        _rotationCts?.Cancel();
-        _rotationCts?.Dispose();
-    }
 
     #region Mouse tracking
 
@@ -137,26 +105,21 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
 
-    #region Interaction
+    void OnEnable()
+    {
+        _inputEventBus.Gameplay.OnLeft += OnLeft;
+        _inputEventBus.Gameplay.OnRight += OnRight;
+        _inputEventBus.Gameplay.MousePosition += OnMousePositionChanged;
+        _inputEventBus.Gameplay.MouseL += OnMouseL;
+    }
 
-    //private void OnInteract(InputAction.CallbackContext callbackContext)
-    //{
-    //    // Raycast по позиции мыши
-    //    Vector2 mousePosition = Mouse.current.position.ReadValue();
-
-    //    Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-
-    //    if (Physics.Raycast(ray, out RaycastHit hit))
-    //    {
-    //        Debug.Log($"Клик по: {hit.collider.name}");
-    //        if (hit.collider.TryGetComponent<InteractableBehaviour>(out var interactable))
-    //        {
-    //            interactable.Interact(this.gameObject);
-    //        }
-    //    }
-    //}
-
-    #endregion
+    void OnDisable()
+    {
+        _inputEventBus.Gameplay.OnLeft -= OnLeft;
+        _inputEventBus.Gameplay.OnRight -= OnRight;
+        _inputEventBus.Gameplay.MousePosition -= OnMousePositionChanged;
+        _inputEventBus.Gameplay.MouseL -= OnMouseL;
+    }
 
     public void SetCameraTarget(CameraTarget cameraTarget)
     {
@@ -184,23 +147,11 @@ public class PlayerController : MonoBehaviour
     }
     private void OnLeft(InputAction.CallbackContext callbackContext)
     {
-        int newIndex = (_currentAngle - 1 + _rotationAngles.Length) % _rotationAngles.Length;
-        float targetAngle = _rotationAngles[newIndex];
-
-        _currentAngle = newIndex;
-        RotateAsync(targetAngle).Forget();
+        PlayerAnimations.PlayAnimationRotationLeft();
     }
 
     private void OnRight(InputAction.CallbackContext callbackContext)
     {
-        int newIndex = (_currentAngle + 1) % _rotationAngles.Length;
-        float targetAngle = _rotationAngles[newIndex];
-
-        _currentAngle = newIndex;
-        RotateAsync(targetAngle).Forget();
-    }
-
-    public async UniTaskVoid RotateAsync(float targetAngleDegrees)
-    {
+        PlayerAnimations.PlayAnimationRotationRight();
     }
 }

@@ -266,12 +266,21 @@ public class DisketContainerAnimations : MonoBehaviour
 
     #endregion
 
-    #region Flags
+    #region Properies
 
     [Header("Flags")]
     [field: SerializeField] public bool CanHover { get; internal set; } = true;
 
     [field: SerializeField] public bool IsHoverEnter { get; private set; } = false;
+
+    #endregion
+
+    #region CTS
+
+    private CancellationTokenSource _globalCTS;
+    private CancellationTokenSource _hoverCTS;
+    private CancellationTokenSource _moveCTS;
+    private CancellationTokenSource _openAndCloseCTS;
 
     #endregion
 
@@ -287,11 +296,7 @@ public class DisketContainerAnimations : MonoBehaviour
     [SerializeField] private OpenLidContext _openContainerLid;
     [SerializeField] private CloseLidContext _closeContainerLid;
 
-    private CancellationTokenSource _globalCTS;
-    private CancellationTokenSource _hoverCTS;
-    private CancellationTokenSource _moveCTS;
-    private CancellationTokenSource _openAndCloseCTS;
-
+    // TODO поменять default на что-то вразумительное
     public CancellationToken GlobalToken => _globalCTS?.Token ?? default;
     public CancellationToken HoverToken => _hoverCTS?.Token ?? default;
     public CancellationToken MoveToken => _moveCTS?.Token ?? default;
